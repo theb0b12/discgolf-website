@@ -1,0 +1,208 @@
+:root {
+    --fairway-bg: #f7f9f4;
+    --card-bg: #ffffff;
+    --card-alt-bg: #f2f6ee;
+    --text-main: #1f2d1f;
+    --text-muted: #526352;
+    
+    --golf-green: #2d5a27;
+    --golf-green-dark: #1b3817;
+    --bunker-sand: #c99354;
+    --fairway-accent: #558b2f;
+    --border-color: #b5c7a9;
+}
+
+body {
+    background-color: var(--fairway-bg);
+    color: var(--text-main);
+    font-family: system-ui, -apple-system, sans-serif;
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* Header - Clubhouse stamped look */
+.header {
+    background-color: var(--golf-green-dark);
+    color: #fdfbf7;
+    border-top: 4px solid var(--bunker-sand);
+    border-bottom: 3px dashed var(--bunker-sand);
+    padding: 20px;
+    text-align: center;
+    border-radius: 2px;
+    margin-bottom: 24px;
+    transform: rotate(-0.3deg); /* Slight organic tilt */
+    box-shadow: 3px 3px 0px rgba(45, 90, 39, 0.2);
+}
+
+.header h2 {
+    margin: 0;
+    font-family: monospace;
+    letter-spacing: 2px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+/* Top Controls */
+#toggleParBtn {
+    background-color: var(--golf-green);
+    color: #ffffff;
+    border: 2px solid var(--golf-green-dark);
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.9rem;
+    box-shadow: 2px 2px 0px var(--golf-green-dark);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    vertical-align: middle;
+}
+
+#toggleParBtn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px var(--golf-green-dark);
+}
+
+#toggleParBtn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px var(--golf-green-dark);
+}
+
+/* Inputs */
+input[type="text"], input[type="number"] {
+    background-color: var(--card-bg);
+    color: var(--text-main);
+    border: 2px solid var(--text-main);
+    padding: 8px 10px;
+    border-radius: 2px;
+    font-family: monospace;
+    font-size: 1rem;
+    vertical-align: middle;
+    margin-left: 4px;
+    box-shadow: 2px 2px 0px rgba(31, 45, 31, 0.15);
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--fairway-accent);
+    background-color: #fff;
+}
+
+/* Scorecard Hole Rows - Stamped grid feel */
+.hole-row {
+    background-color: var(--card-bg);
+    padding: 12px 16px;
+    border-radius: 3px;
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: monospace;
+    border: 2px solid var(--text-main);
+    border-left: 8px solid var(--golf-green);
+    box-shadow: 3px 3px 0px rgba(31, 45, 31, 0.1);
+    transition: transform 0.1s ease;
+}
+
+.hole-row:nth-child(even) {
+    background-color: var(--card-alt-bg);
+    border-left-color: var(--fairway-accent);
+}
+
+.hole-label {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--golf-green-dark);
+    letter-spacing: -0.5px;
+}
+
+/* Controls grouping */
+.hole-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.par-display, .score-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: bold;
+}
+
+/* Row Input fields */
+.score-input, .par-input {
+    background-color: var(--fairway-bg) !important;
+    color: var(--text-main);
+    border: 2px solid var(--text-main);
+    padding: 6px 4px;
+    border-radius: 2px;
+    font-family: monospace;
+    font-size: 1rem;
+    text-align: center;
+    width: 48px;
+    font-weight: 800;
+}
+
+.score-input:focus, .par-input:focus {
+    outline: none;
+    background-color: #fff !important;
+    border-color: var(--bunker-sand);
+}
+
+/* Toggle visibility for individual pars */
+.par-input {
+    display: none;
+}
+
+body.editing-par .par-input {
+    display: inline-block;
+}
+
+body.editing-par .par-text {
+    display: none;
+}
+
+/* Total Score Banner - Rugged clubhouse badge */
+#totalScore {
+    background-color: var(--bunker-sand);
+    border: 2px solid var(--golf-green-dark);
+    padding: 16px;
+    text-align: center;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    font-family: monospace;
+    margin-top: 30px;
+    color: var(--golf-green-dark);
+    font-weight: 900;
+    box-shadow: 4px 4px 0px var(--golf-green-dark);
+    transform: rotate(0.2deg);
+}
+
+/* Add a responsive wrapper adjustment for phones */
+body {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    margin: 0 auto;
+}
+
+/* Ensure controls wrap cleanly on narrow screens */
+@media (max-width: 400px) {
+    .hole-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .hole-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* Prevent auto-zoom on iOS when tapping inputs by ensuring font-size is at least 16px */
+input[type="text"], input[type="number"] {
+    font-size: 16px !important;
+}
