@@ -12,7 +12,7 @@ toggleParBtn.addEventListener("click", function() {
     if (document.body.classList.contains("editing-par")) {
         toggleParBtn.textContent = "Done Editing Pars";
     } else {
-        toggleParBtn.textContent = "Edit Individual Pars";
+        toggleParBtn.textContent = "Edit Pars";
     }
 });
 
@@ -104,3 +104,33 @@ document.body.addEventListener("input", function(event) {
         calculateTotal();
     }
 });
+
+function saveRound(){
+    const scoreInputs = document.querySelectorAll(".score-input");
+    let hasScores = Array.from(scoreInputs).some(input => input.value.trim() !== "");
+    
+    if (!hasScores) {
+        alert("Please enter at least one hole's score before saving!");
+        return;
+    }
+
+    const roundData = {
+        date: new Date().toLocaleDateString(undefined, { 
+            month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+        }),
+        summary: document.getElementById("totalScore").textContent,
+        scores: Array.from(scoreInputs).map(input => input.value.trim() || "—"),
+        course: document.getElementById("name").value
+    };
+
+    let history = JSON.parse(localStorage.getItem("discGolfHistory")) || [];
+    
+    history.unshift(roundData);
+
+    localStorage.setItem("discGolfHistory", JSON.stringify(history));
+
+}
+
+
+const saveRoundBtn = document.getElementById("saveRoundBtn");
+saveRoundBtn.addEventListener("click", saveRound);

@@ -1,26 +1,31 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Disc Golf Calc</title>
     <link rel="stylesheet" href="style.css">
-
 </head>
-
 <body>
     <div class="header">
         <h2>Disc Golf Calc</h2>
     </div>
-    <button type="button" id="toggleParBtn" style="margin-left: 10px;">Edit Individual Pars</button>
-    <input type="text" id="holeNum" maxlength="2" size="10" placeholder="Number of Holes">
-    <input type="text" id="par"  maxlength="1" size="6" placeholder="Default Par">
+
+    
+    <div class="config-controls">
+        <button type="button" id="toggleParBtn">Edit Pars</button>
+        <input type="number" id="holeNum" inputmode="numeric" placeholder="Holes" min="1" max="21">
+        <input type="number" id="par" inputmode="numeric" placeholder="Default Par" min="1" max="5">
+    </div>
+
     <p id="holes"></p>
 
     <h3 id="totalScore">Total Score: 0</h3>
-
-
-
+    <input type="text" id="name" placeholder="Course Name">
+    <button type="button" id="saveRoundBtn" class="goodBtn">Save Round</button>
+    <a href="scores">
+        <button type="button" id="viewScores" class="goodBtn">View Scores</button>
+    </a>
     <script src="app.js"></script>
-
 </body>
-
 </html>
