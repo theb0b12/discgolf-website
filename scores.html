@@ -5,23 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Round History - Disc Golf Calc</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Chart.js and Canvas Confetti CDNs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="header">
-        <h2>Round History</h2>
+        <h2>Round History & Stats</h2>
     </div>
 
     <!-- Navigation back to calculator -->
-    <div style="margin-bottom: 16px;">
-        <a href="index" style="text-decoration: none; font-family: monospace; font-weight: bold; color: var(--golf-green);">← Back to Calculator</a>
+    <div class="back-nav">
+        <a href="index">← Back to Calculator</a>
     </div>
 
-    <!-- Container where saved rounds will appear -->
-    <div id="historyList"></div>
+    <!-- Tab Navigation Buttons -->
+    <div class="tab-container">
+        <button type="button" id="historyTabBtn" class="tab-btn active-tab">Round History</button>
+        <button type="button" id="analyticsTabBtn" class="tab-btn">Analytics & Graphs</button>
+    </div>
 
-    <!-- Clear History Button -->
-    <div style="margin-top: 30px;">
-        <button type="button" id="clearHistoryBtn" style="background-color: #a94442; color: white; border: 2px solid var(--golf-green-dark); padding: 12px; border-radius: 4px; font-weight: 700; cursor: pointer; width: 100%; font-family: monospace;">Clear History</button>
+    <!-- Tab 1: Round History Content -->
+    <div id="historyTabContent" class="tab-content">
+        <div id="historyList"></div>
+        <!-- Clear History Button -->
+        <div class="clear-history-wrapper">
+            <button type="button" id="clearHistoryBtn">Clear History</button>
+        </div>
+    </div>
+
+    <!-- Tab 2: Analytics & Graphs Content -->
+    <div id="analyticsTabContent" class="tab-content" style="display: none;">
+        <div class="analytics-stack">
+            <!-- Overall Round Trend Graph Card -->
+            <div class="analytics-card">
+                <h3>Score Trend</h3>
+                <div class="chart-wrapper">
+                    <canvas id="overallTrendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Hole-by-Hole Performance Graph Card -->
+            <div class="analytics-card">
+                <h3>Hole Average Performance</h3>
+                <div class="chart-wrapper">
+                    <canvas id="holePerformanceChart"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="scores.js"></script>
