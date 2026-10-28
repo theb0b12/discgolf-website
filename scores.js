@@ -119,12 +119,18 @@ function renderHistory() {
                     
                     if (scoreVal !== null && scoreVal !== undefined && scoreVal !== "—") {
                         const diff = scoreVal - parVal;
-                        if (diff <= -1) {
-                            badgeClass = "hole-badge-birdie";
+                        if (diff <= -2) {
+                            badgeClass = "hole-badge-ace-eagle"; // Ace or Eagle (-2 or better)
+                        } else if (diff === -1) {
+                            badgeClass = "hole-badge-birdie";    // Birdie (-1)
                         } else if (diff === 0) {
-                            badgeClass = "hole-badge-par";
+                            badgeClass = "hole-badge-par";       // Par (0)
+                        } else if (diff === 1) {
+                            badgeClass = "hole-badge-bogey";     // Bogey (+1)
+                        } else if (diff === 2) {
+                            badgeClass = "hole-badge-double";    // Double Bogey (+2)
                         } else {
-                            badgeClass = "hole-badge-bogey";
+                            badgeClass = "hole-badge-triple-plus"; // Triple Bogey or worse (+3+)
                         }
                     }
 
@@ -163,6 +169,26 @@ function renderAnalyticsCharts() {
         return match ? parseInt(match[1], 10) : 0;
     });
 
+    // Calculate Least Squares Line of Best Fit
+    const n = overallScores.length;
+    let trendData = [];
+    if (n > 1) {
+        let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+        for (let i = 0; i < n; i++) {
+            sumX += i;
+            sumY += overallScores[i];
+            sumXY += i * overallScores[i];
+            sumXX += i * i;
+        }
+        const denominator = (n * sumXX - sumX * sumX);
+        const slope = denominator !== 0 ? (n * sumXY - sumX * sumY) / denominator : 0;
+        const intercept = (sumY - slope * sumX) / n;
+
+        trendData = overallScores.map((_, i) => slope * i + intercept);
+    } else {
+        trendData = [...overallScores];
+    }
+
     if (overallChartInstance) {
         overallChartInstance.destroy();
     }
@@ -176,19 +202,31 @@ function renderAnalyticsCharts() {
                 label: 'Total Score',
                 data: overallScores,
                 borderColor: '#2d5a27',
-                backgroundColor: 'rgba(45, 90, 39, 0.1)',
+                backgroundColor: 'transparent', // Removed background fill
                 borderWidth: 2.5,
                 tension: 0.2,
-                fill: true,
+                fill: false, // Ensure fill is off
                 pointBackgroundColor: '#c99354',
                 pointRadius: 5
+            }, {
+                label: 'Trend Line',
+                data: trendData,
+                borderColor: '#c99354',
+                borderWidth: 2,
+                borderDash: [6, 6],
+                fill: false,
+                pointRadius: 0,
+                tension: 0
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
+                legend: { 
+                    display: true,
+                    position: 'bottom'
+                }
             },
             scales: {
                 y: {
