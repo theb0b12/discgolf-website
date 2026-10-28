@@ -102,7 +102,7 @@ function renderHistory() {
                     </div>
                 </div>
                 <div class="hole-breakdown-container" style="display: none;">
-                    <div class="breakdown-title">Hole-by-Hole Breakdown:</div>
+                    <div class="breakdown-title">Hole by Hole Breakdown:</div>
                     <div class="hole-grid"></div>
                 </div>
             `;
