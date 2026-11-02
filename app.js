@@ -107,6 +107,7 @@ document.body.addEventListener("input", function(event) {
 
 function saveRound(){
     const scoreInputs = document.querySelectorAll(".score-input");
+    const parInputs = document.querySelectorAll(".par-input");
     let hasScores = Array.from(scoreInputs).some(input => input.value.trim() !== "");
     
     if (!hasScores) {
@@ -119,16 +120,14 @@ function saveRound(){
             month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' 
         }),
         summary: document.getElementById("totalScore").textContent,
-        scores: Array.from(scoreInputs).map(input => input.value.trim() || "—"),
-        course: document.getElementById("name").value
+        scores: Array.from(scoreInputs).map(input => input.value.trim() !== "" ? parseInt(input.value.trim(), 10) : null),
+        pars: Array.from(parInputs).map(input => parseInt(input.value, 10) || 3),
+        course: document.getElementById("name").value.trim() // cleans up trailing whitespace
     };
 
     let history = JSON.parse(localStorage.getItem("discGolfHistory")) || [];
-    
     history.unshift(roundData);
-
     localStorage.setItem("discGolfHistory", JSON.stringify(history));
-
 }
 
 

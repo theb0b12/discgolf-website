@@ -47,6 +47,12 @@
             <!-- Hole-by-Hole Performance Graph Card -->
             <div class="analytics-card">
                 <h3>Hole Average Performance</h3>
+                <!-- Course selector dropdown for hole performance -->
+                <div class="analytics-filter-wrapper" style="margin-bottom: 12px;">
+                    <select id="holePerformanceCourseSelect" style="width: 100%; padding: 8px; font-family: monospace; border: 2px solid var(--text-main); border-radius: 2px; background: var(--card-bg);">
+                        <!-- Options populated dynamically -->
+                    </select>
+                </div>
                 <div class="chart-wrapper">
                     <canvas id="holePerformanceChart"></canvas>
                 </div>

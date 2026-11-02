@@ -44,6 +44,28 @@ function setupTabs() {
     });
 }
 
+// Helper or inline logic to get relative score (+/-) for a round
+function getRelativeScore(round) {
+    if (round.scores && round.pars && Array.isArray(round.scores) && Array.isArray(round.pars)) {
+        let totalRel = 0;
+        let hasPlayed = false;
+        round.scores.forEach((s, idx) => {
+            if (s !== null && s !== undefined && s !== "—" && !isNaN(s)) {
+                const p = round.pars[idx] || 3;
+                totalRel += (s - p);
+                hasPlayed = true;
+            }
+        });
+        if (hasPlayed) return totalRel;
+    }
+    // Fallback parsing from summary string if pars array isn't present in older saved rounds (backwards compatibility)
+    const match = round.summary && round.summary.match(/\(([-\+]\d+|\d+)\)/);
+    if (match) {
+        return parseInt(match[1], 10);
+    }
+    return 0;
+}
+
 function renderHistory() {
     const historyListEl = document.getElementById("historyList");
     if (!historyListEl) return;
@@ -156,18 +178,16 @@ function renderHistory() {
     });
 }
 
+
 function renderAnalyticsCharts() {
     let history = JSON.parse(localStorage.getItem("discGolfHistory")) || [];
     if (history.length === 0) return;
 
     const chronologicalRounds = [...history].reverse();
 
-    // 1. Overall Trend Chart Data
+    // 1. Overall Trend Chart Data (Normalized to relative score +/-)
     const overallLabels = chronologicalRounds.map(r => r.date.split(',')[0]);
-    const overallScores = chronologicalRounds.map(r => {
-        const match = r.summary.match(/Total Score:\s*(\d+)/);
-        return match ? parseInt(match[1], 10) : 0;
-    });
+    const overallScores = chronologicalRounds.map(r => getRelativeScore(r));
 
     // Calculate Least Squares Line of Best Fit
     const n = overallScores.length;
@@ -199,13 +219,13 @@ function renderAnalyticsCharts() {
         data: {
             labels: overallLabels,
             datasets: [{
-                label: 'Total Score',
+                label: 'Score',
                 data: overallScores,
                 borderColor: '#2d5a27',
-                backgroundColor: 'transparent', // Removed background fill
+                backgroundColor: 'transparent',
                 borderWidth: 2.5,
                 tension: 0.2,
-                fill: false, // Ensure fill is off
+                fill: false,
                 pointBackgroundColor: '#c99354',
                 pointRadius: 5
             }, {
@@ -240,77 +260,112 @@ function renderAnalyticsCharts() {
         }
     });
 
-    // 2. Hole-by-Hole Average Performance Chart Data
-    const holeTotals = {};
+    // 2. Hole-by-Hole Average Performance Chart Setup with Course Dropdown Filter
+    const courseSelect = document.getElementById("holePerformanceCourseSelect");
     
-    history.forEach(round => {
-        if (round.scores && Array.isArray(round.scores)) {
-            round.scores.forEach((score, hIdx) => {
-                if (score !== null && score !== undefined && score !== "—") {
-                    if (!holeTotals[hIdx]) {
-                        holeTotals[hIdx] = { scoreSum: 0, count: 0, parSum: 0 };
-                    }
-                    holeTotals[hIdx].scoreSum += parseInt(score, 10);
-                    const par = round.pars && round.pars[hIdx] ? round.pars[hIdx] : 3;
-                    holeTotals[hIdx].parSum += par;
-                    holeTotals[hIdx].count += 1;
-                }
-            });
-        }
+    // Get unique list of courses from history
+    const courses = [...new Set(history.map(r => r.course || "Unnamed Course"))];
+    
+    // Remember current selection if possible
+    const currentSelection = courseSelect.value;
+    courseSelect.innerHTML = "";
+    
+    courses.forEach(courseName => {
+        const option = document.createElement("option");
+        option.value = courseName;
+        option.textContent = courseName;
+        courseSelect.appendChild(option);
     });
 
-    const holeLabels = [];
-    const avgScores = [];
-    const avgPars = [];
-
-    Object.keys(holeTotals).sort((a, b) => parseInt(a) - parseInt(b)).forEach(hIdx => {
-        const stats = holeTotals[hIdx];
-        holeLabels.push(`Hole ${parseInt(hIdx) + 1}`);
-        avgScores.push((stats.scoreSum / stats.count).toFixed(1));
-        avgPars.push((stats.parSum / stats.count).toFixed(1));
-    });
-
-    if (holeChartInstance) {
-        holeChartInstance.destroy();
+    if (courses.includes(currentSelection)) {
+        courseSelect.value = currentSelection;
     }
 
-    const holeCtx = document.getElementById("holePerformanceChart").getContext("2d");
-    holeChartInstance = new Chart(holeCtx, {
-        type: 'bar',
-        data: {
-            labels: holeLabels,
-            datasets: [
-                {
-                    label: 'Avg Score',
-                    data: avgScores,
-                    backgroundColor: '#2d5a27',
-                    borderRadius: 3
-                },
-                {
-                    label: 'Avg Par',
-                    data: avgPars,
-                    backgroundColor: '#c99354',
-                    borderRadius: 3
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom' }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(0,0,0,0.05)' }
-                },
-                x: {
-                    grid: { display: false }
+    // Function to render the hole chart for the selected course
+    const updateHoleChartForSelectedCourse = () => {
+        const selectedCourse = courseSelect.value;
+        const holeTotals = {};
+        
+        history.forEach(round => {
+            const roundCourse = round.course || "Unnamed Course";
+            if (roundCourse === selectedCourse) {
+                if (round.scores && Array.isArray(round.scores)) {
+                    round.scores.forEach((score, hIdx) => {
+                        if (score !== null && score !== undefined && score !== "—") {
+                            if (!holeTotals[hIdx]) {
+                                holeTotals[hIdx] = { scoreSum: 0, count: 0, parSum: 0 };
+                            }
+                            holeTotals[hIdx].scoreSum += parseInt(score, 10);
+                            const par = round.pars && round.pars[hIdx] ? round.pars[hIdx] : 3;
+                            holeTotals[hIdx].parSum += par;
+                            holeTotals[hIdx].count += 1;
+                        }
+                    });
                 }
             }
+        });
+
+        const holeLabels = [];
+        const avgScores = [];
+        const avgPars = [];
+
+        Object.keys(holeTotals).sort((a, b) => parseInt(a) - parseInt(b)).forEach(hIdx => {
+            const stats = holeTotals[hIdx];
+            holeLabels.push(`Hole ${parseInt(hIdx) + 1}`);
+            avgScores.push((stats.scoreSum / stats.count).toFixed(1));
+            avgPars.push((stats.parSum / stats.count).toFixed(1));
+        });
+
+        if (holeChartInstance) {
+            holeChartInstance.destroy();
         }
-    });
+
+        const holeCtx = document.getElementById("holePerformanceChart").getContext("2d");
+        holeChartInstance = new Chart(holeCtx, {
+            type: 'bar',
+            data: {
+                labels: holeLabels,
+                datasets: [
+                    {
+                        label: 'Avg Score',
+                        data: avgScores,
+                        backgroundColor: '#2d5a27',
+                        borderRadius: 3
+                    },
+                    {
+                        label: 'Avg Par',
+                        data: avgPars,
+                        backgroundColor: '#c99354',
+                        borderRadius: 3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.05)' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    };
+
+    // Attach listener once
+    if (!courseSelect.hasAttribute("data-listener-attached")) {
+        courseSelect.setAttribute("data-listener-attached", "true");
+        courseSelect.addEventListener("change", updateHoleChartForSelectedCourse);
+    }
+
+    updateHoleChartForSelectedCourse();
 }
 
 function clearHistory() {
@@ -321,3 +376,4 @@ function clearHistory() {
         if (holeChartInstance) holeChartInstance.destroy();
     }
 }
+
