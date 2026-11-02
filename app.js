@@ -122,12 +122,14 @@ function saveRound(){
         summary: document.getElementById("totalScore").textContent,
         scores: Array.from(scoreInputs).map(input => input.value.trim() !== "" ? parseInt(input.value.trim(), 10) : null),
         pars: Array.from(parInputs).map(input => parseInt(input.value, 10) || 3),
-        course: document.getElementById("name").value.trim() // cleans up trailing whitespace
+        course: document.getElementById("name").value
     };
 
     let history = JSON.parse(localStorage.getItem("discGolfHistory")) || [];
     history.unshift(roundData);
     localStorage.setItem("discGolfHistory", JSON.stringify(history));
+    // redirect to scores after clicking the button
+    window.location.href = "scores";
 }
 
 

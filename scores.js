@@ -134,7 +134,11 @@ function renderHistory() {
 
             if (round.scores && Array.isArray(round.scores)) {
                 round.scores.forEach((scoreVal, hIdx) => {
-                    const parVal = round.pars && round.pars[hIdx] ? round.pars[hIdx] : 3;
+                    // Fix: Ensure we accurately pull the par for this specific hole, falling back safely if missing
+                    const parVal = (round.pars && round.pars[hIdx] !== undefined && round.pars[hIdx] !== null) 
+                        ? round.pars[hIdx] 
+                        : (round.defaultPar || 3);
+                        
                     const scoreDisplay = scoreVal !== null && scoreVal !== undefined && scoreVal !== "—" ? scoreVal : "—";
                     
                     let badgeClass = "hole-badge-neutral";
@@ -158,6 +162,7 @@ function renderHistory() {
 
                     const holeBox = document.createElement("div");
                     holeBox.className = `hole-box ${badgeClass}`;
+                    // Displays the correct par value (P4, P5, etc.) instead of assuming P3
                     holeBox.innerHTML = `<div class="hole-num">H${hIdx + 1}</div><div class="hole-score">${scoreDisplay}</div><div class="hole-par">P${parVal}</div>`;
                     holeGrid.appendChild(holeBox);
                 });
