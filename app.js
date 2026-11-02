@@ -122,7 +122,7 @@ function saveRound(){
         summary: document.getElementById("totalScore").textContent,
         scores: Array.from(scoreInputs).map(input => input.value.trim() !== "" ? parseInt(input.value.trim(), 10) : null),
         pars: Array.from(parInputs).map(input => parseInt(input.value, 10) || 3),
-        course: document.getElementById("name").value
+        course: document.getElementById("name").value.trim() // trims the white space
     };
 
     let history = JSON.parse(localStorage.getItem("discGolfHistory")) || [];

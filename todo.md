@@ -14,7 +14,7 @@
 - [x] ~~The hole by hole average is overall, not on a per course basis~~
 - [x] ~~The detailed round history hole analysis is wrong for the colors if the par is not 3. It also displays the incorrect pars for this.~~
 - [x] ~~the save round button does not have feedback, meaning you don't know if you have clicked it or not. MAYBE make it so it goes to the scores tab after it saves it.~~
-- [ ] The course name does not remove whitespace at the end, in case you accidentally put a space at the end
-- [ ] The saved rounds in localStorage don't save the pars for each hole respectively with the scores
+- [x] ~~The course name does not remove whitespace at the end, in case you accidentally put a space at the end~~
+- [x] ~~The saved rounds in localStorage don't save the pars for each hole respectively with the scores~~
 - [ ] The least squares line is not that helpful without a key saying ex: "-0.2 per round played". AKA needs a slope key
 - [ ] The course name box should be the whole horizontal distance of the screen at the bottom for that input box.
