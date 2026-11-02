@@ -194,9 +194,10 @@ function renderAnalyticsCharts() {
     const overallLabels = chronologicalRounds.map(r => r.date.split(',')[0]);
     const overallScores = chronologicalRounds.map(r => getRelativeScore(r));
 
-    // Calculate Least Squares Line of Best Fit
+    // Calculate Least Squares Line of Best Fit & Slope
     const n = overallScores.length;
     let trendData = [];
+    let slopeVal = 0;
     if (n > 1) {
         let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
         for (let i = 0; i < n; i++) {
@@ -206,13 +207,17 @@ function renderAnalyticsCharts() {
             sumXX += i * i;
         }
         const denominator = (n * sumXX - sumX * sumX);
-        const slope = denominator !== 0 ? (n * sumXY - sumX * sumY) / denominator : 0;
-        const intercept = (sumY - slope * sumX) / n;
+        slopeVal = denominator !== 0 ? (n * sumXY - sumX * sumY) / denominator : 0;
+        const intercept = (sumY - slopeVal * sumX) / n;
 
-        trendData = overallScores.map((_, i) => slope * i + intercept);
+        trendData = overallScores.map((_, i) => slopeVal * i + intercept);
     } else {
         trendData = [...overallScores];
     }
+
+    // Format slope string for the key/legend
+    const slopeFormatted = slopeVal >= 0 ? `+${slopeVal.toFixed(1)}` : slopeVal.toFixed(1);
+    const trendLabel = n > 1 ? `Trend (${slopeFormatted} per round)` : `Trend Line`;
 
     if (overallChartInstance) {
         overallChartInstance.destroy();
@@ -234,7 +239,7 @@ function renderAnalyticsCharts() {
                 pointBackgroundColor: '#c99354',
                 pointRadius: 5
             }, {
-                label: 'Trend Line',
+                label: trendLabel, // Uses our dynamic slope key here!
                 data: trendData,
                 borderColor: '#c99354',
                 borderWidth: 2,

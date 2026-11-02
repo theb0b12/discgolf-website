@@ -252,7 +252,7 @@ body.editing-par .par-text {
     align-items: center;
     justify-content: center;
     touch-action: manipulation;
-    margin: 5px
+    margin: 0;
 }
 
 .course-group-card {
@@ -586,4 +586,34 @@ body {
 .hole-badge-triple-plus {
     background-color: #7b1fa2;
     color: #fff;
+}
+
+#name {
+    width: 100%;
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.action-buttons-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.action-buttons-row > *,
+.action-buttons-row a {
+    flex: 1;
+    display: flex;
+}
+
+.action-buttons-row .goodBtn {
+    width: 100%;
+    margin: 0;
+    
+}
+.action-buttons-row a{
+    text-decoration: none;
 }

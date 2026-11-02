@@ -8,6 +8,7 @@ Follow this to a tee
 - Don't change the way it looks on a whim. Read style.css to see what the design ux/ui language is already.
 - **This website is a disc golf phone webapp, Non bloated only useful features.**
 - **This app does not look AI at all. Don't add dashed boxes around things, or any other AI like css stylings.**
+- only generate the code that needs to be changed, and show me that. No need to copy the whole file into the response
 
 
 ### How to read the files
