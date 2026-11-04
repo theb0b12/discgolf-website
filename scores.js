@@ -386,4 +386,3 @@ function clearHistory() {
         if (holeChartInstance) holeChartInstance.destroy();
     }
 }
-
