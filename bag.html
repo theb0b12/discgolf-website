@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Disc Bag - Disc Golf Calc</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="header">
+        <h2>My Disc Bag</h2>
+    </div>
+
+    <div class="back-nav">
+        <a href="index">← Back to Calculator</a>
+    </div>
+
+    <div class="analytics-stack">
+        <div class="analytics-card">
+            <h3>Add a Disc</h3>
+            <form id="addDiscForm" style="display: flex; flex-direction: column; gap: 10px;">
+                <input type="text" id="discName" placeholder="Disc Name (e.g. Destroyer)" required>
+                <select id="discType" required style="width: 100%; padding: 8px; font-family: monospace; border: 2px solid var(--text-main); border-radius: 2px; background: var(--card-bg);">
+                    <option value="" disabled selected>Select Disc Type</option>
+                    <option value="Distance Driver">Distance Driver</option>
+                    <option value="Fairway Driver">Fairway Driver</option>
+                    <option value="Midrange">Midrange</option>
+                    <option value="Approach Putter">Approach Putter</option>
+                    <option value="Putting Putter">Putting Putter</option>
+                </select>
+                <div style="display: flex; gap: 8px;">
+                    <input type="number" id="discSpeed" placeholder="Speed" min="1" max="15" step="0.5" required style="flex:1;">
+                    <input type="number" id="discGlide" placeholder="Glide" min="1" max="7" step="1" required style="flex:1;">
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="number" id="discTurn" placeholder="Turn" min="-5" max="2" step="0.5" required style="flex:1;">
+                    <input type="number" id="discFade" placeholder="Fade" min="0" max="6" step="0.5" required style="flex:1;">
+                </div>
+                <button type="submit" class="goodBtn" style="width: 100%;">Add Disc to Bag</button>
+            </form>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Shot Profile</h3>
+            <div class="chart-wrapper">
+                <canvas id="bagChart"></canvas>
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0;">Current Discs</h3>
+                <select id="discSortSelect" style="padding: 6px; font-family: monospace; border: 2px solid var(--text-main); border-radius: 2px; background: var(--card-bg); font-size: 0.8rem;">
+                    <option value="type">Sort by Type</option>
+                    <option value="speed">Sort by Speed</option>
+                    <option value="name">Sort by Name</option>
+                </select>
+            </div>
+            <div id="discList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+    </div>
+
+    <script src="bag.js"></script>
+</body>
+</html>
