@@ -137,8 +137,14 @@ function renderBagChart(bag) {
         const turn = disc.turn || 0;
         const fade = disc.fade || 0;
 
-        // Forward distance based on speed and glide
-        const distance = (speed * 32) + (glide * 12);
+        const x1 = 16.4345   // Speed multiplier
+        const x2 = 37.1665   // Glide multiplier
+        const x3 = 3.9783    // Turn multiplier
+        const x4 = 3.4284    // Fade multiplier
+        const x5 = 39.5325   // bias
+
+        // Forward distance based calculated numbers
+        const distance = (x1 * speed) + (x2 * glide) + (x3 * turn) + (x4 * fade) + x5;
 
         // Lateral offset (RHBH physics: negative turn = right drift, positive fade = left hook)
         const turnOffset = -turn * (distance / 10);
@@ -188,14 +194,14 @@ function renderBagChart(bag) {
                     type: 'linear',
                     position: 'bottom',
                     title: { display: true, text: '← Left Fade / Right Turn → (ft)' },
-                    min: -120,
-                    max: 120,
+                    min: -100,
+                    max: 100,
                     grid: { color: 'rgba(0,0,0,0.05)' }
                 },
                 y: {
                     type: 'linear',
                     title: { display: true, text: 'Distance (ft)' },
-                    min: 0,
+                    min: 100,
                     max: 500,
                     grid: { color: 'rgba(0,0,0,0.05)' }
                 }
