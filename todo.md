@@ -8,4 +8,5 @@
 - [ ] Add c1 ad c2 and drive distance and angle and stuff like that
 
 ### bugs
-- [ ] Colors for disc type in the list, are harsh. And the formatting is a little off for the headers
+- [ ] Colors for disc type in the list, are harsh. And the formatting is a little off for the header
+- [ ] The delete (x) button for the discs on the bag page deletes the wrong ones from the list. It deletes the one above it
