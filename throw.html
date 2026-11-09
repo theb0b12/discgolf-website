@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Throw Tracker - Disc Golf Calc</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <h2>GPS Throw Tracker</h2>
+    </div>
+
+    <div class="back-nav">
+        <a href="index">← Back to Calculator</a>
+    </div>
+
+    <div class="analytics-stack">
+        <div class="analytics-card" style="text-align: center; padding: 20px;">
+            <h3>Throw Distance</h3>
+            <div id="distanceDisplay" style="font-size: 2.5rem; font-family: monospace; font-weight: 900; color: var(--golf-green); margin: 20px 0;">0 ft</div>
+            <div id="statusDisplay" style="font-size: 0.9rem; font-family: monospace; color: var(--text-muted); margin-bottom: 20px;">Tap "Set Tee (Start)" where you are throwing from.</div>
+            
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button type="button" id="startBtn" class="goodBtn" style="flex: 1;">1. Set Tee (Start)</button>
+                <button type="button" id="endBtn" class="goodBtn" style="flex: 1; background-color: var(--bunker-sand); color: var(--golf-green-dark);" disabled>2. Mark Disc (End)</button>
+            </div>
+            <button type="button" id="resetBtn" style="margin-top: 12px; background: #a94442; color: white; border: none; padding: 10px; border-radius: 4px; width: 100%; font-family: monospace; font-weight: bold; cursor: pointer; display: none;">Reset</button>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Recent Throws</h3>
+            <div id="throwList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+    </div>
+
+    <script src="throw.js"></script>
+</body>
+</html>
