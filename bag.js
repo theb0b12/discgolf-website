@@ -52,16 +52,18 @@ function addDisc() {
     if (!name || !type || isNaN(speed) || isNaN(glide) || isNaN(turn) || isNaN(fade)) return;
 
     const bag = getBag();
-    bag.push({ name, type, speed, glide, turn, fade });
+    // Added a unique ID so deletion always targets the correct disc regardless of sorting order
+    const id = Date.now().toString(36) + Math.random().toString(36.2);
+    bag.push({ id, name, type, speed, glide, turn, fade });
     saveBag(bag);
 
     document.getElementById("addDiscForm").reset();
     renderBag();
 }
 
-function removeDisc(index) {
-    const bag = getBag();
-    bag.splice(index, 1);
+function removeDisc(id) {
+    let bag = getBag();
+    bag = bag.filter(disc => disc.id !== id);
     saveBag(bag);
     renderBag();
 }
@@ -70,8 +72,8 @@ function renderBag() {
     let bag = getBag();
     const sortVal = document.getElementById("discSortSelect") ? document.getElementById("discSortSelect").value : "type";
 
-    // Sort the bag based on user selection
-    bag.sort((a, b) => {
+    // Sort a copy of the bag based on user selection
+    let sortedBag = [...bag].sort((a, b) => {
         if (sortVal === "type") {
             const orderA = typeOrder[a.type] || 99;
             const orderB = typeOrder[b.type] || 99;
@@ -88,31 +90,31 @@ function renderBag() {
     const listEl = document.getElementById("discList");
     if (!listEl) return;
     
-    if (bag.length === 0) {
+    if (sortedBag.length === 0) {
         listEl.innerHTML = `<p class="no-rounds-text">No discs in bag yet.</p>`;
     } else {
         listEl.innerHTML = "";
         
-        // Map each disc type to a unique color tag background
+        // Softened color tags for disc types
         const typeColors = {
-            "Distance Driver": "#d32f2f",    // Red
-            "Fairway Driver": "#e65100",     // Orange
-            "Midrange": "#2d5a27",           // Golf Green
-            "Approach Putter": "#1976d2",    // Blue
-            "Putting Putter": "#7b1fa2"      // Purple
+            "Distance Driver": "#c62828",    // Softer Red
+            "Fairway Driver": "#d84315",     // Softer Orange
+            "Midrange": "#388e3c",           // Softer Green
+            "Approach Putter": "#1565c0",    // Softer Blue
+            "Putting Putter": "#6a1b9a"      // Softer Purple
         };
 
-        bag.forEach((disc, idx) => {
+        sortedBag.forEach((disc) => {
             const badgeColor = typeColors[disc.type] || 'var(--fairway-accent)';
             const item = document.createElement("div");
             item.className = "hole-row";
             item.style.margin = "0";
             item.innerHTML = `
                 <div>
-                    <strong>${disc.name}</strong> <span style="font-size: 0.75rem; background: ${badgeColor}; color: white; padding: 2px 5px; border-radius: 3px; margin-left: 6px;">${disc.type || 'Unknown'}</span>
+                    <strong>${disc.name}</strong> <span style="font-size: 0.75rem; background: ${badgeColor}; color: white; padding: 2px 6px; border-radius: 3px; margin-left: 6px; font-weight: normal;">${disc.type || 'Unknown'}</span>
                     <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Speed: ${disc.speed} | Glide: ${disc.glide} | Turn: ${disc.turn} | Fade: ${disc.fade}</div>
                 </div>
-                <button type="button" onclick="removeDisc(${idx})" style="background: #a94442; color: white; border: none; padding: 6px 10px; border-radius: 3px; cursor: pointer; font-family: monospace;">X</button>
+                <button type="button" onclick="removeDisc('${disc.id}')" style="background: #a94442; color: white; border: none; padding: 6px 10px; border-radius: 3px; cursor: pointer; font-family: monospace;">X</button>
             `;
             listEl.appendChild(item);
         });
