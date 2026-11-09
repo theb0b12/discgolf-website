@@ -1,7 +1,24 @@
 let startCoords = null;
+let map = null;
+let startMarker = null;
+let endMarker = null;
+let throwLine = null;
+
+const GPS_OPTIONS = {
+    enableHighAccuracy: true,
+    timeout: 15000,
+    maximumAge: 0
+};
 
 document.addEventListener("DOMContentLoaded", function() {
     renderThrowHistory();
+
+    // Initialize Leaflet Map
+    map = L.map('map').setView([37.7749, -122.4194], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
     const startBtn = document.getElementById("startBtn");
     const endBtn = document.getElementById("endBtn");
@@ -21,6 +38,17 @@ document.addEventListener("DOMContentLoaded", function() {
                     lat: position.coords.latitude,
                     lon: position.coords.longitude
                 };
+
+                // Clear previous map layers if restarting
+                if (startMarker) map.removeLayer(startMarker);
+                if (endMarker) map.removeLayer(endMarker);
+                if (throwLine) map.removeLayer(throwLine);
+
+                // Center map on Tee and add marker
+                map.setView([startCoords.lat, startCoords.lon], 18);
+                startMarker = L.marker([startCoords.lat, startCoords.lon]).addTo(map)
+                    .bindPopup("Tee").openPopup();
+
                 document.getElementById("statusDisplay").textContent = "Tee position set! Walk to your disc and tap Mark Disc.";
                 document.getElementById("distanceDisplay").textContent = "0 ft";
                 startBtn.style.opacity = "0.6";
@@ -31,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 alert("Error getting GPS location: " + error.message);
                 document.getElementById("statusDisplay").textContent = "Failed to get GPS location. Please ensure location services are enabled.";
             },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            GPS_OPTIONS
         );
     });
 
@@ -52,6 +80,17 @@ document.addEventListener("DOMContentLoaded", function() {
                     endCoords.lat, endCoords.lon
                 );
 
+                // Add Disc marker and draw line between Tee and Disc
+                endMarker = L.marker([endCoords.lat, endCoords.lon]).addTo(map)
+                    .bindPopup(`Disc (${distanceFeet} ft)`).openPopup();
+
+                throwLine = L.polyline([
+                    [startCoords.lat, startCoords.lon],
+                    [endCoords.lat, endCoords.lon]
+                ], { color: '#1f2d1f', weight: 4 }).addTo(map);
+
+                map.fitBounds(throwLine.getBounds(), { padding: [30, 30] });
+
                 document.getElementById("distanceDisplay").textContent = `${distanceFeet} ft`;
                 document.getElementById("statusDisplay").textContent = `Throw measured successfully! (${Math.round(distanceFeet / 3.28084)} meters)`;
 
@@ -65,7 +104,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 alert("Error getting GPS location: " + error.message);
                 document.getElementById("statusDisplay").textContent = "Failed to get GPS location.";
             },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            GPS_OPTIONS
         );
     });
 
@@ -76,6 +115,10 @@ document.addEventListener("DOMContentLoaded", function() {
         startBtn.style.opacity = "1";
         endBtn.setAttribute("disabled", "true");
         resetBtn.style.display = "none";
+
+        if (startMarker) map.removeLayer(startMarker);
+        if (endMarker) map.removeLayer(endMarker);
+        if (throwLine) map.removeLayer(throwLine);
     });
 });
 

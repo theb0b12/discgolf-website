@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Throw Tracker - Disc Golf Calc</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
     <div class="header">
@@ -32,8 +33,15 @@
             <h3>Recent Throws</h3>
             <div id="throwList" style="display: flex; flex-direction: column; gap: 8px;"></div>
         </div>
-    </div>
+        <div id="distanceDisplay" style="font-size: 2.5rem; font-family: monospace; font-weight: 900; color: var(--golf-green); margin: 20px 0;">0 ft</div>
+        <div id="statusDisplay" style="font-size: 0.9rem; font-family: monospace; color: var(--text-muted); margin-bottom: 20px;">Tap "Set Tee (Start)" where you are throwing from.</div>
 
+        <!-- Add Map Container -->
+        <div id="map"></div>
+
+        <div style="display: flex; gap: 10px; justify-content: center;">
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="throw.js"></script>
 </body>
 </html>
