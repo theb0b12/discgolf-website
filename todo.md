@@ -1,8 +1,6 @@
 ### Near Future
 - [ ] Correct the graph
     - [ ] Create the proper total distance equation
-- [ ] Create better data for the disc bags
-     - [ ] Ability to select plastic type and brand
 
 
 ### Far Future
