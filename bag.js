@@ -211,3 +211,10 @@ function renderBagChart(bag) {
         }
     });
 }
+
+document.getElementById('clear-all-discs-btn')?.addEventListener('click', () => {
+    if (confirm("Are you sure you want to clear all discs?")) {
+        localStorage.removeItem("discGolfBag");
+        renderBag();
+    }
+});

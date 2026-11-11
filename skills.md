@@ -27,3 +27,6 @@ app.js is the homepage javascript file.
 
 scores.js is the scores javascript file.
 - The main thing with this is that the data is helpful and easy to read. The graphs must be informational without being too complicated.
+
+bag.js is where the disc data is processed
+bag.html is the html for the disc data
