@@ -11,6 +11,12 @@
         <h2>Disc Golf Calc</h2>
     </div>
 
+    <div class="config-controls" style="margin-bottom: 10px;">
+        <select id="savedCourseSelect" style="width: 100%; padding: 10px 8px; font-family: monospace; border: 2px solid var(--text-main); border-radius: 2px; background: var(--card-bg);">
+            <option value="" disabled selected>Select Saved Course...</option>
+            <option value="custom">Custom / New Course</option>
+        </select>
+    </div>
     
     <div class="config-controls">
         <button type="button" id="toggleParBtn">Edit Pars</button>
@@ -22,6 +28,12 @@
 
     <h3 id="totalScore">Total Score: 0</h3>
     <input type="text" id="name" placeholder="Course Name">
+    <div id="saveCourseCheckboxContainer" style="margin-bottom: 12px; font-family: monospace; font-size: 0.85rem; display: none;">
+        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="checkbox" id="saveCourseLayoutCheck"> Save this course layout for future rounds
+        </label>
+    </div>
+
     <div class="action-buttons-row">
         <button type="button" id="saveRoundBtn" class="goodBtn">Save Round</button>
         <a href="scores">

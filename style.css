@@ -617,3 +617,12 @@ body {
 .action-buttons-row a{
     text-decoration: none;
 }
+
+#map {
+    width: 100%;
+    height: 250px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    border: 2px solid var(--text-main);
+    z-index: 1;
+}

@@ -16,6 +16,104 @@ toggleParBtn.addEventListener("click", function() {
     }
 });
 
+function getSavedCourses() {
+    return JSON.parse(localStorage.getItem("discGolfCourses")) || [];
+}
+
+function saveCourseToStorage(courseData) {
+    let courses = getSavedCourses();
+    // Check if course with same name already exists, update it; otherwise push new
+    const existingIndex = courses.findIndex(c => c.name.toLowerCase() === courseData.name.toLowerCase());
+    if (existingIndex >= 0) {
+        courses[existingIndex] = { ...courses[existingIndex], ...courseData };
+    } else {
+        courses.push(courseData);
+    }
+    localStorage.setItem("discGolfCourses", JSON.stringify(courses));
+    populateSavedCoursesDropdown();
+}
+
+function populateSavedCoursesDropdown() {
+    const selectEl = document.getElementById("savedCourseSelect");
+    if (!selectEl) return;
+
+    const courses = getSavedCourses();
+    
+    // Preserve default options
+    selectEl.innerHTML = `
+        <option value="" disabled selected>Select Saved Course...</option>
+        <option value="custom">Custom / New Course</option>
+    `;
+
+    courses.forEach(course => {
+        const option = document.createElement("option");
+        option.value = course.id;
+        option.textContent = `${course.name} ${course.layout ? '(' + course.layout + ')' : ''} - ${course.holeCount} Holes`;
+        selectEl.appendChild(option);
+    });
+}
+
+function loadCourseIntoCalculator(courseId) {
+    const courses = getSavedCourses();
+    const course = courses.find(c => c.id === courseId);
+    if (!course) return;
+
+    // Set Course Name
+    document.getElementById("name").value = course.name;
+
+    // Set Hole Count
+    holeNumInput.value = course.holeCount;
+
+    // Trigger updateHoles to generate rows
+    updateHoles();
+
+    // Populate individual pars
+    const parInputs = document.querySelectorAll(".par-input");
+    course.pars.forEach((parVal, idx) => {
+        if (parInputs[idx]) {
+            parInputs[idx].value = parVal;
+        }
+    });
+
+    calculateTotal();
+}
+
+// Hook into DOMContentLoaded in app.js
+document.addEventListener("DOMContentLoaded", function() {
+    populateSavedCoursesDropdown();
+
+    const savedCourseSelect = document.getElementById("savedCourseSelect");
+    if (savedCourseSelect) {
+        savedCourseSelect.addEventListener("change", function() {
+            if (this.value === "custom") {
+                document.getElementById("name").value = "";
+                holeNumInput.value = "";
+                parInput.value = "";
+                updateHoles();
+            } else {
+                loadCourseIntoCalculator(this.value);
+            }
+        });
+    }
+
+    const courseNameInput = document.getElementById("name");
+    const saveCourseContainer = document.getElementById("saveCourseCheckboxContainer");
+    
+    if (courseNameInput && saveCourseContainer) {
+        courseNameInput.addEventListener("input", function() {
+            const nameVal = this.value.trim();
+            if (nameVal.length > 0) {
+                const courses = getSavedCourses();
+                const exists = courses.some(c => c.name.toLowerCase() === nameVal.toLowerCase());
+                // Show checkbox if it's a new or modified course layout
+                saveCourseContainer.style.display = exists ? "none" : "block";
+            } else {
+                saveCourseContainer.style.display = "none";
+            }
+        });
+    }
+});
+
 function updateHoles() {
     let holeNum = parseInt(holeNumInput.value, 10) || 0;
     let defaultPar = parseInt(parInput.value, 10) || 3;
@@ -106,6 +204,21 @@ document.body.addEventListener("input", function(event) {
 });
 
 function saveRound(){
+    const saveLayoutChecked = document.getElementById("saveCourseLayoutCheck")?.checked;
+    const courseName = document.getElementById("name").value.trim();
+
+    if (saveLayoutChecked && courseName) {
+        const scoreInputs = document.querySelectorAll(".score-input");
+        const parInputs = document.querySelectorAll(".par-input");
+        const courseData = {
+            id: "course_" + Date.now(),
+            name: courseName,
+            layout: "Standard",
+            holeCount: scoreInputs.length,
+            pars: Array.from(parInputs).map(input => parseInt(input.value, 10) || 3)
+        };
+        saveCourseToStorage(courseData);
+    }
     const scoreInputs = document.querySelectorAll(".score-input");
     const parInputs = document.querySelectorAll(".par-input");
     let hasScores = Array.from(scoreInputs).some(input => input.value.trim() !== "");
