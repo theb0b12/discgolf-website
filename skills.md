@@ -13,9 +13,9 @@ Follow this to a tee
 
 ### How to read the files
 todo.md has the todos for the project
-- "things that are wrong with it": These are the errors and the bugs that need to be fixed
-- "Soon": these are the things that are in the short term, features that want to be added
-- "Hard": These are the things that are in the future of the project, but are hard to implement right now
+- "Bugs": These are the errors and the bugs that need to be fixed
+- "Near future": these are the things that are in the short term, features that want to be added
+- "Far Future": These are the things that are in the future of the project, but are hard to implement right now
 
 index.html is the front end for the home page
 
