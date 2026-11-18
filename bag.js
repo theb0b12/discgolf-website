@@ -1,4 +1,5 @@
 let bagChartInstance = null;
+let stabilityChartInstance = null;
 
 const typeOrder = {
     "Distance Driver": 1,
@@ -121,6 +122,114 @@ function renderBag() {
     }
 
     renderBagChart(bag);
+    renderStabilityChart(bag);
+}
+
+function renderStabilityChart(bag) {
+    if (stabilityChartInstance) {
+        stabilityChartInstance.destroy();
+    }
+
+    const ctxCanvas = document.getElementById("stabilityChart");
+    if (!ctxCanvas) return;
+    const ctx = ctxCanvas.getContext("2d");
+
+    // X-axis: Stability = Turn + Fade
+    const dataPoints = bag.map((disc) => {
+        const speed = disc.speed || 1;
+        const turn = disc.turn || 0;
+        const fade = disc.fade || 0;
+        const stability = turn + fade;
+
+        return {
+            x: stability,
+            y: speed,
+            discName: disc.name,
+            disc: disc
+        };
+    });
+
+    const pointColors = dataPoints.map((_, index) => distinctColors[index % distinctColors.length]);
+
+    // Custom plugin to draw disc name labels next to each point
+    const directLabelPlugin = {
+        id: 'directLabelPlugin',
+        afterDatasetsDraw(chart) {
+            const { ctx, chartArea } = chart;
+            ctx.save();
+            ctx.font = 'bold 11px monospace';
+            ctx.fillStyle = '#1f2d1f';
+            ctx.textBaseline = 'middle';
+
+            chart.data.datasets[0].data.forEach((point, index) => {
+                const meta = chart.getDatasetMeta(0);
+                const element = meta.data[index];
+                if (element) {
+                    const { x, y } = element.tooltipPosition();
+                    // Offset text slightly to the right of the dot
+                    ctx.fillText(point.discName, x + 14, y);
+                }
+            });
+            ctx.restore();
+        }
+    };
+
+    stabilityChartInstance = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Discs',
+                data: dataPoints,
+                pointRadius: 12,
+                pointHoverRadius: 14,
+                backgroundColor: pointColors,
+                borderColor: pointColors
+            }]
+        },
+        plugins: [directLabelPlugin],
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    right: 40 // Adds breathing room on the right for long disc names
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const point = context.raw;
+                            const d = point.disc;
+                            return `${point.discName} (${d.type}): Speed ${d.speed}, Stability ${point.x} (Turn: ${d.turn}, Fade: ${d.fade})`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'top',
+                    title: { display: true, text: 'Stability (Turn + Fade)' },
+                    min: -3,
+                    max: 4,
+                    reverse: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                y: {
+                    type: 'linear',
+                    title: { display: true, text: 'Speed' },
+                    min: 1,
+                    max: 12,
+                    ticks: {
+                        stepSize: 1 // Forces every integer speed to have a tick and grid line
+                    },
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                }
+            }
+        }
+    });
 }
 
 function renderBagChart(bag) {
