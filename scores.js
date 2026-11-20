@@ -65,6 +65,57 @@ function getRelativeScore(round) {
     }
     return 0;
 }
+function formatRoundSummary(scores, pars, fallbackDefaultPar = 3) {
+    let totalScore = 0;
+    let playedPar = 0;
+
+    scores.forEach((scoreVal, idx) => {
+        if (scoreVal !== null && scoreVal !== undefined && scoreVal !== "" && !isNaN(scoreVal)) {
+            const numScore = parseInt(scoreVal, 10);
+            const holePar = (pars && pars[idx] !== undefined && pars[idx] !== null)
+                ? parseInt(pars[idx], 10)
+                : fallbackDefaultPar;
+            totalScore += numScore;
+            playedPar += holePar;
+        }
+    });
+
+    const relScore = totalScore - playedPar;
+    return `Total Score: ${totalScore} (${relScore})`;
+}
+
+function saveEditedRound(historyIndex, newScores, newPars) {
+    const history = JSON.parse(localStorage.getItem("discGolfHistory")) || [];
+    const targetRound = history[historyIndex];
+    if (!targetRound) return;
+
+    const normalizedScores = newScores.map(val => {
+        if (val === "" || val === null || val === undefined) return null;
+        const parsed = parseInt(val, 10);
+        return isNaN(parsed) ? null : parsed;
+    });
+
+    const normalizedPars = newPars.map((val, idx) => {
+        const parsed = parseInt(val, 10);
+        if (!isNaN(parsed)) return parsed;
+        return (targetRound.pars && targetRound.pars[idx]) || targetRound.defaultPar || 3;
+    });
+
+    history[historyIndex] = {
+        ...targetRound,
+        scores: normalizedScores,
+        pars: normalizedPars,
+        summary: formatRoundSummary(normalizedScores, normalizedPars, targetRound.defaultPar || 3)
+    };
+
+    localStorage.setItem("discGolfHistory", JSON.stringify(history));
+    renderHistory();
+
+    const analyticsContent = document.getElementById("analyticsTabContent");
+    if (analyticsContent && analyticsContent.style.display !== "none") {
+        renderAnalyticsCharts();
+    }
+}
 
 function renderHistory() {
     const historyListEl = document.getElementById("historyList");
@@ -79,14 +130,14 @@ function renderHistory() {
 
     historyListEl.innerHTML = "";
 
-    // Group rounds by course name[cite: 4]
+    // Group rounds by course name while keeping original localStorage index
     const coursesMap = {};
-    history.forEach(round => {
+    history.forEach((round, historyIndex) => {
         const courseName = round.course || "Unnamed Course";
         if (!coursesMap[courseName]) {
             coursesMap[courseName] = [];
         }
-        coursesMap[courseName].push(round);
+        coursesMap[courseName].push({ round, historyIndex });
     });
 
     Object.keys(coursesMap).forEach((courseName) => {
@@ -107,7 +158,7 @@ function renderHistory() {
         const roundsListEl = document.createElement("div");
         roundsListEl.className = "rounds-sublist";
 
-        rounds.forEach((round) => {
+        rounds.forEach(({ round, historyIndex }) => {
             const roundCard = document.createElement("div");
             roundCard.className = "hole-row round-card-item";
 
@@ -131,42 +182,107 @@ function renderHistory() {
 
             const breakdownContainer = roundCard.querySelector(".hole-breakdown-container");
             const holeGrid = roundCard.querySelector(".hole-grid");
+            let isEditing = false;
 
-            if (round.scores && Array.isArray(round.scores)) {
+            const renderHoleBoxes = () => {
+                holeGrid.innerHTML = "";
+                if (!round.scores || !Array.isArray(round.scores)) return;
+
                 round.scores.forEach((scoreVal, hIdx) => {
-                    // Fix: Ensure we accurately pull the par for this specific hole, falling back safely if missing
-                    const parVal = (round.pars && round.pars[hIdx] !== undefined && round.pars[hIdx] !== null) 
-                        ? round.pars[hIdx] 
+                    const parVal = (round.pars && round.pars[hIdx] !== undefined && round.pars[hIdx] !== null)
+                        ? round.pars[hIdx]
                         : (round.defaultPar || 3);
-                        
-                    const scoreDisplay = scoreVal !== null && scoreVal !== undefined && scoreVal !== "—" ? scoreVal : "—";
-                    
-                    let badgeClass = "hole-badge-neutral";
-                    
-                    if (scoreVal !== null && scoreVal !== undefined && scoreVal !== "—") {
-                        const diff = scoreVal - parVal;
-                        if (diff <= -2) {
-                            badgeClass = "hole-badge-ace-eagle"; // Ace or Eagle (-2 or better)
-                        } else if (diff === -1) {
-                            badgeClass = "hole-badge-birdie";    // Birdie (-1)
-                        } else if (diff === 0) {
-                            badgeClass = "hole-badge-par";       // Par (0)
-                        } else if (diff === 1) {
-                            badgeClass = "hole-badge-bogey";     // Bogey (+1)
-                        } else if (diff === 2) {
-                            badgeClass = "hole-badge-double";    // Double Bogey (+2)
-                        } else {
-                            badgeClass = "hole-badge-triple-plus"; // Triple Bogey or worse (+3+)
-                        }
-                    }
 
                     const holeBox = document.createElement("div");
-                    holeBox.className = `hole-box ${badgeClass}`;
-                    // Displays the correct par value (P4, P5, etc.) instead of assuming P3
-                    holeBox.innerHTML = `<div class="hole-num">H${hIdx + 1}</div><div class="hole-score">${scoreDisplay}</div><div class="hole-par">P${parVal}</div>`;
+
+                    if (isEditing) {
+                        const currentScore = (scoreVal !== null && scoreVal !== undefined && scoreVal !== "—") ? scoreVal : "";
+                        holeBox.className = "hole-box hole-badge-neutral";
+                        holeBox.innerHTML = `
+                            <div class="hole-num">H${hIdx + 1}</div>
+                            <input type="number" inputmode="numeric" min="1" max="15" class="edit-score-input" data-hole="${hIdx}" value="${currentScore}" placeholder="—" style="width: 100%; text-align: center; font-family: monospace; font-weight: 800;">
+                            <div class="hole-par">P <input type="number" inputmode="numeric" min="1" max="5" class="edit-par-input" data-hole="${hIdx}" value="${parVal}" style="width: 34px; text-align: center; font-family: monospace;"></div>
+                        `;
+                    } else {
+                        const scoreDisplay = scoreVal !== null && scoreVal !== undefined && scoreVal !== "—" ? scoreVal : "—";
+                        let badgeClass = "hole-badge-neutral";
+
+                        if (scoreVal !== null && scoreVal !== undefined && scoreVal !== "—") {
+                            const diff = scoreVal - parVal;
+                            if (diff <= -2) {
+                                badgeClass = "hole-badge-ace-eagle";
+                            } else if (diff === -1) {
+                                badgeClass = "hole-badge-birdie";
+                            } else if (diff === 0) {
+                                badgeClass = "hole-badge-par";
+                            } else if (diff === 1) {
+                                badgeClass = "hole-badge-bogey";
+                            } else if (diff === 2) {
+                                badgeClass = "hole-badge-double";
+                            } else {
+                                badgeClass = "hole-badge-triple-plus";
+                            }
+                        }
+
+                        holeBox.className = `hole-box ${badgeClass}`;
+                        holeBox.innerHTML = `<div class="hole-num">H${hIdx + 1}</div><div class="hole-score">${scoreDisplay}</div><div class="hole-par">P${parVal}</div>`;
+                    }
+
                     holeGrid.appendChild(holeBox);
                 });
-            }
+            };
+
+            renderHoleBoxes();
+
+            const actionsBar = document.createElement("div");
+            actionsBar.style.marginTop = "8px";
+            actionsBar.style.display = "flex";
+            actionsBar.style.gap = "8px";
+
+            const editBtn = document.createElement("button");
+            editBtn.type = "button";
+            editBtn.className = "tab-btn";
+            editBtn.style.padding = "6px 10px";
+            editBtn.style.fontSize = "0.8rem";
+            editBtn.textContent = "Edit Round";
+
+            const cancelBtn = document.createElement("button");
+            cancelBtn.type = "button";
+            cancelBtn.className = "tab-btn";
+            cancelBtn.style.padding = "6px 10px";
+            cancelBtn.style.fontSize = "0.8rem";
+            cancelBtn.style.display = "none";
+            cancelBtn.textContent = "Cancel";
+
+            editBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                if (!isEditing) {
+                    isEditing = true;
+                    breakdownContainer.style.display = "block";
+                    toggleHeader.querySelector(".toggle-indicator").textContent = "▲ Hide Holes";
+                    editBtn.textContent = "Save Changes";
+                    cancelBtn.style.display = "inline-block";
+                    renderHoleBoxes();
+                } else {
+                    const scoreInputs = holeGrid.querySelectorAll(".edit-score-input");
+                    const parInputs = holeGrid.querySelectorAll(".edit-par-input");
+                    const updatedScores = Array.from(scoreInputs).map(inp => inp.value.trim());
+                    const updatedPars = Array.from(parInputs).map(inp => inp.value.trim());
+                    saveEditedRound(historyIndex, updatedScores, updatedPars);
+                }
+            });
+
+            cancelBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                isEditing = false;
+                editBtn.textContent = "Edit Round";
+                cancelBtn.style.display = "none";
+                renderHoleBoxes();
+            });
+
+            actionsBar.appendChild(editBtn);
+            actionsBar.appendChild(cancelBtn);
+            breakdownContainer.appendChild(actionsBar);
 
             const toggleHeader = roundCard.querySelector(".round-toggle-header");
             toggleHeader.addEventListener("click", () => {
